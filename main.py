@@ -11,7 +11,7 @@ def k_means(pxLoad, width, height) :
 
     #initialization
     averages = []
-    clusters = [ [], [], [], [], [] ]
+
     clAvg1 = [0,0]
     clAvg2 = [0,0]
     clAvg3 = [0,0]
@@ -37,6 +37,7 @@ def k_means(pxLoad, width, height) :
     #keeps iterating until the average color of each cluster no longer changes. 
     while(not(sameAvgCounter == 5)) :
         sameAvgCounter = 0
+        clusters = [ [], [], [], [], [] ]
         #Iterates through all pixels, adding them to their respective cluster.
         for i in range(width):
             for j in range(height):
@@ -45,14 +46,14 @@ def k_means(pxLoad, width, height) :
                     proximityGreen = math.sqrt((averages[k][1] - pxLoad[i,j][1]) ** 2)
                     proximityBlue = math.sqrt((averages[k][2] - pxLoad[i,j][2]) ** 2)
                     proximity = math.sqrt((proximityRed + proximityGreen + proximityBlue) ** 2)
-                    if(proximity <= currLowestProximity):
+                    if(proximity < currLowestProximity):
                         currLowestProximity = proximity
                         cluster = k
-
+                
                 clusters[cluster].append(px[i,j])
+                currLowestProximity = height + width
         
         #Calculate the average of each of the clusters and overwrite them. If no cluster averages have been overwritten 
-
         for i in range(len(clusters)) :
             redAvg = 0
             greenAvg = 0
@@ -68,8 +69,6 @@ def k_means(pxLoad, width, height) :
             if(averages[i] == [int(redAvg), int(blueAvg), int(greenAvg)]) :
                 sameAvgCounter = sameAvgCounter + 1
             averages[i] = [int(redAvg), int(blueAvg), int(greenAvg)]
-        
-        print(sameAvgCounter)
     
     return averages
 
@@ -98,3 +97,4 @@ if __name__ == '__main__' :
     training_img.save("training_data.jpg")
 
     colors = k_means(px, width, height)
+
