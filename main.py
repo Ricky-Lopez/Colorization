@@ -8,7 +8,7 @@ from PIL import Image
 
 #K means for image averaging.
 def k_means(pxLoad, width, height, k) :
-    print("Clustering... (This may take a while!)")
+    print("Clustering . . . (This may take a while!)")
 
     #initialization
     averages = []
@@ -18,6 +18,7 @@ def k_means(pxLoad, width, height, k) :
     currLowestProximity = 2147483647
     sameAvgCounter = 0
     clusterLoopCounter = 0
+    userCounter = 0
 
     #ensures that every pixel chosen for the start of the cluster is different. 
     while( not(noDup(clAvg)) ) :
@@ -29,7 +30,14 @@ def k_means(pxLoad, width, height, k) :
 
     
     #keeps iterating until the average color of each cluster no longer changes. 
-    while(not(sameAvgCounter == 4)) :
+    while(not(sameAvgCounter == (k-1))) :
+        
+        userCounter += 1
+        if(userCounter == 15) :
+            userCounter = 0
+            print("Still clustering . . .")
+    
+
         sameAvgCounter_old = sameAvgCounter
         sameAvgCounter = 0
         clusters = []
@@ -108,9 +116,8 @@ if __name__ == '__main__' :
     #Creation of Training Data and Testing Data
     left_half = (0, 0, width/2, height) #Area tuple of left half
     right_half = (width/2, 0, width, height) #Area tuple of right half
-    testing_img = img.crop(right_half)
+
     training_img = img.crop(left_half)
-    testing_img.save("image_process/testing_data.jpg")
     training_img.save("image_process/training_data.jpg")
 
     #Grayscale Code
@@ -120,6 +127,10 @@ if __name__ == '__main__' :
             avg = (px[i,j][0] + px[i,j][1] + px[i,j][2]) / 3
             px[i,j] = (int(avg), int(avg), int(avg))
     img.save("image_process/image_grayscale.jpg")
+
+    testing_img = img.crop(right_half)
+    testing_img.save("image_process/testing_data.jpg")
+
 
     img = Image.open("image_process/image.jpg")
     px = img.load()
