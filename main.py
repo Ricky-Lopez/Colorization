@@ -6,54 +6,47 @@ import copy
 from random import randint
 from PIL import Image
 
-#K means with K set to 5.
-def k_means(pxLoad, width, height) :
+#K means for image averaging.
+def k_means(pxLoad, width, height, k) :
     print("Clustering... (This may take a while!)")
 
     #initialization
     averages = []
     clAvg = []
-
-    clAvg1 = [0,0]
-    clAvg2 = [0,0]
-    clAvg3 = [0,0]
-    clAvg4 = [0,0]
-    clAvg5 = [0,0]
+    for i in range(k):
+        clAvg.append([0,0])
     currLowestProximity = 2147483647
     sameAvgCounter = 0
     clusterLoopCounter = 0
 
     #ensures that every pixel chosen for the start of the cluster is different. 
-    while(clAvg1 == clAvg2 or clAvg1 == clAvg3 or clAvg1 == clAvg4 or clAvg1 == clAvg5 or clAvg2 == clAvg3 or clAvg2 == clAvg4 or clAvg2 == clAvg5 or clAvg3 == clAvg4 or clAvg3 == clAvg5 or clAvg4 == clAvg5) :
-        clAvg1 = [randint(0, width) , randint(0, height)]
-        clAvg2 = [randint(0, width) , randint(0, height)]
-        clAvg3 = [randint(0, width) , randint(0, height)]
-        clAvg4 = [randint(0, width) , randint(0, height)]
-        clAvg5 = [randint(0, width) , randint(0, height)]
-    
-    averages.append(pxLoad[clAvg1[0], clAvg1[1]])
-    averages.append(pxLoad[clAvg2[0], clAvg2[1]])
-    averages.append(pxLoad[clAvg3[0], clAvg3[1]])
-    averages.append(pxLoad[clAvg4[0], clAvg4[1]])
-    averages.append(pxLoad[clAvg5[0], clAvg5[1]])
+    while( not(noDup(clAvg)) ) :
+        for i in range(k):
+            clAvg[i] = [randint(0, width) , randint(0, height)]
+
+    for i in range(k):
+        averages.append(pxLoad[clAvg[i][0], clAvg[i][1]])
+
     
     #keeps iterating until the average color of each cluster no longer changes. 
     while(not(sameAvgCounter == 4)) :
         sameAvgCounter_old = sameAvgCounter
         sameAvgCounter = 0
-        clusters = [ [], [], [], [], [] ]
+        clusters = []
+        for i in range(k):
+            clusters.append([])
 
         #Iterates through all pixels, adding them to their respective cluster.
         for i in range(width):
             for j in range(height):
-                for k in range(len(averages)):
-                    proximityRed = abs(averages[k][0] - pxLoad[i,j][0])
-                    proximityGreen = abs(averages[k][1] - pxLoad[i,j][1])
-                    proximityBlue = abs(averages[k][2] - pxLoad[i,j][2])
+                for l in range(len(averages)):
+                    proximityRed = abs(averages[l][0] - pxLoad[i,j][0])
+                    proximityGreen = abs(averages[l][1] - pxLoad[i,j][1])
+                    proximityBlue = abs(averages[l][2] - pxLoad[i,j][2])
                     proximity = math.sqrt((proximityRed ** 2) + (proximityGreen ** 2) + (proximityBlue ** 2))
                     if(proximity < currLowestProximity):
                         currLowestProximity = proximity
-                        cluster = k
+                        cluster = l
                 
                 clusters[cluster].append(px[i,j])
                 currLowestProximity = 2147483647
@@ -64,10 +57,10 @@ def k_means(pxLoad, width, height) :
             redAvg = 0
             greenAvg = 0
             blueAvg = 0
-            for k in range(len(clusters[i])) :
-                redAvg = redAvg + clusters[i][k][0]
-                greenAvg = greenAvg + clusters[i][k][1]
-                blueAvg = blueAvg + clusters[i][k][2]
+            for j in range(len(clusters[i])) :
+                redAvg = redAvg + clusters[i][j][0]
+                greenAvg = greenAvg + clusters[i][j][1]
+                blueAvg = blueAvg + clusters[i][j][2]
 
             if( len(clusters[i]) ) :
                 redAvg = redAvg / len(clusters[i])
@@ -97,6 +90,7 @@ def k_means(pxLoad, width, height) :
     print(averages)
     return averages
 
+#helper function for k_means.
 def noDup(list) :
     for i in range(len(list)) :
         for j in range(len(list)) :
@@ -129,7 +123,8 @@ if __name__ == '__main__' :
 
     img = Image.open("image_process/image.jpg")
     px = img.load()
-    colors = k_means(px, width, height) #k_means to determine the 5 colors.
+    k = int(input("Please enter the number of colors you would like to average the image into: "))
+    colors = k_means(px, width, height, k) #k_means to determine the 5 colors.
 
     #Replacing the true colors of the left half of the image with the 5 colors.
 
