@@ -8,9 +8,11 @@ from PIL import Image
 
 #K means with K set to 5.
 def k_means(pxLoad, width, height) :
+    print("Clustering... (This may take a while!)")
 
     #initialization
     averages = []
+    clAvg = []
 
     clAvg1 = [0,0]
     clAvg2 = [0,0]
@@ -86,21 +88,27 @@ def k_means(pxLoad, width, height) :
             clusterLoopCounter += 1
         else:
             clusterLoopCounter = 0
-        if(clusterLoopCounter > 50):
+        if(clusterLoopCounter > 30):
             print(averages)
             return averages
 
-        print("Clusters Stabilized: " , sameAvgCounter)
+        #print("Clusters Stabilized: " , sameAvgCounter)
     
     print(averages)
     return averages
 
-            
+def noDup(list) :
+    for i in range(len(list)) :
+        for j in range(len(list)) :
+            if(not(i == j)) :
+                if(list[i] == list[j]) :
+                    return False
+    return True
     
 
 if __name__ == '__main__' :
 
-    img = Image.open("image_0.jpg") #Full Image
+    img = Image.open("image_process/image.jpg") #Full Image
     width, height = img.size
 
     #Creation of Training Data and Testing Data
@@ -108,42 +116,43 @@ if __name__ == '__main__' :
     right_half = (width/2, 0, width, height) #Area tuple of right half
     testing_img = img.crop(right_half)
     training_img = img.crop(left_half)
-    testing_img.save("testing_data.jpg")
-    training_img.save("training_data.jpg")
+    testing_img.save("image_process/testing_data.jpg")
+    training_img.save("image_process/training_data.jpg")
 
-    #Grayscale Code#
+    #Grayscale Code
     px = img.load()
     for i in range(width):
         for j in range(height):
             avg = (px[i,j][0] + px[i,j][1] + px[i,j][2]) / 3
             px[i,j] = (int(avg), int(avg), int(avg))
-    img.save("image_0_grayscale.jpg")
+    img.save("image_process/image_grayscale.jpg")
 
-    img = Image.open("image_0.jpg")
+    img = Image.open("image_process/image.jpg")
     px = img.load()
-    colors = k_means(px, width, height)
+    colors = k_means(px, width, height) #k_means to determine the 5 colors.
 
     #Replacing the true colors of the left half of the image with the 5 colors.
 
-    training_img = Image.open("training_data.jpg")
+    training_img = Image.open("image_process/training_data.jpg")
     width, height = training_img.size
-    px = training_img.load()
-    lowestProx = 766
+    px_training = training_img.load()
 
     #reinitializes every pixel on the left side of the image.
     for i in range(width):
         for j in range(height):
+            lowestProx = 2147483647
             for k in range(len(colors)) :
-                redProx = math.sqrt((px[i,j][0] - colors[k][0]) ** 2)
-                greenProx = math.sqrt((px[i,j][1] - colors[k][1]) ** 2)
-                blueProx = math.sqrt((px[i,j][2] - colors[k][2]) ** 2)
-                trueProx = math.sqrt((redProx + greenProx + blueProx) ** 2)
+                redProx = abs(px[i,j][0] - colors[k][0])
+                greenProx = abs(px[i,j][1] - colors[k][1])
+                blueProx = abs(px[i,j][2] - colors[k][2])
+                trueProx = math.sqrt( (redProx ** 2) + (greenProx ** 2) + (blueProx **2) )
 
                 if(trueProx < lowestProx) :
-                    px[i,j] = colors[k]
+                    px_training[i,j] = colors[k]
                     lowestProx = trueProx
+                
 
-    training_img.save("training_data.jpg")
+    training_img.save("image_process/training_data_RECOLORED.jpg")
 
 
 
