@@ -3,8 +3,10 @@ import random
 import math
 import time
 import copy
+import basicAgent
 from random import randint
 from PIL import Image
+from copy import deepcopy
 
 #K means for image averaging.
 def k_means(pxLoad, width, height, k) :
@@ -117,9 +119,6 @@ if __name__ == '__main__' :
     left_half = (0, 0, width/2, height) #Area tuple of left half
     right_half = (width/2, 0, width, height) #Area tuple of right half
 
-    training_img = img.crop(left_half)
-    training_img.save("image_process/training_data.jpg")
-
     #Grayscale Code
     px = img.load()
     for i in range(width):
@@ -129,8 +128,9 @@ if __name__ == '__main__' :
     img.save("image_process/image_grayscale.jpg")
 
     testing_img = img.crop(right_half)
+    training_img = img.crop(left_half)
     testing_img.save("image_process/testing_data.jpg")
-
+    training_img.save("image_process/training_data.jpg")
 
     img = Image.open("image_process/image.jpg")
     px = img.load()
@@ -139,9 +139,9 @@ if __name__ == '__main__' :
 
     #Replacing the true colors of the left half of the image with the 5 colors.
 
-    training_img = Image.open("image_process/training_data.jpg")
-    width, height = training_img.size
-    px_training = training_img.load()
+    recolored_training_img = training_img.copy()
+    width, height = recolored_training_img.size
+    px_recolored_training = recolored_training_img.load()
 
     #reinitializes every pixel on the left side of the image.
     for i in range(width):
@@ -154,14 +154,13 @@ if __name__ == '__main__' :
                 trueProx = math.sqrt( (redProx ** 2) + (greenProx ** 2) + (blueProx **2) )
 
                 if(trueProx < lowestProx) :
-                    px_training[i,j] = colors[k]
+                    px_recolored_training[i,j] = colors[k]
                     lowestProx = trueProx
                 
 
-    training_img.save("image_process/training_data_RECOLORED.jpg")
+    recolored_training_img.save("image_process/training_data_RECOLORED.jpg")
 
-
-
+    basicAgent.basicAgent(training_img, testing_img, recolored_training_img)
     
 
 
