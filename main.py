@@ -4,6 +4,7 @@ import math
 import time
 import copy
 import basicAgent
+import advancedAgent as aa
 from random import randint
 from PIL import Image
 from copy import deepcopy
@@ -119,6 +120,12 @@ if __name__ == '__main__' :
     left_half = (0, 0, width/2, height) #Area tuple of left half
     right_half = (width/2, 0, width, height) #Area tuple of right half
 
+    testing_img_C = img.crop(right_half)
+    training_img_C = img.crop(left_half)
+    testing_img_C.save("image_process/testing_data_COLOR.jpg")
+    training_img_C.save("image_process/training_data_COLOR.jpg")
+    px_testing_data = testing_img_C.load()
+
     #Grayscale Code
     px = img.load()
     for i in range(width):
@@ -158,9 +165,53 @@ if __name__ == '__main__' :
                     lowestProx = trueProx
                 
 
-    recolored_training_img.save("image_process/training_data_RECOLORED.jpg")
+    #basicAgent.basicAgent(training_img, testing_img, recolored_training_img)
 
-    basicAgent.basicAgent(training_img, testing_img, recolored_training_img)
+    learningRate = float(input("what should the learning rate be?"))
+    aa.advancedAgent(training_img_C, testing_img, training_img)
+
+    #restructuring the new final image
+
+    colorized = Image.open("image_process/testing_img_COLORIZED.jpg")
+
+    left_size = training_img_C.size
+    right_size = colorized.size
+
+    new_image = Image.new('RGB' , (2*left_size[0], left_size[1]), (250,250,250) )
+    new_image.paste(training_img_C, (0,0))
+    new_image.paste(colorized, (left_size[0], 0))
+    new_image.save("image_process/FINAL_IMAGE.JPG")
+    new_image.show()
+
+
+
+
+
+
+    #Accuracy Analysis
+    '''
+
+
+    recolored_testing_img = testing_img.copy()
+    width, height = recolored_testing_img.size
+    px_recolored_testing = recolored_testing_img.load()
+
+    for i in range(width):
+        for j in range(height):
+            lowestProx = 2147483647
+            for k in range(len(colors)) :
+                redProx = abs(px_testing_data[i,j][0] - colors[k][0])
+                greenProx = abs(px_testing_data[i,j][1] - colors[k][1])
+                blueProx = abs(px_testing_data[i,j][2] - colors[k][2])
+                trueProx = math.sqrt( (redProx ** 2) + (greenProx ** 2) + (blueProx **2) )
+
+                if(trueProx < lowestProx) :
+                    px_recolored_testing[i,j] = colors[k]
+                    lowestProx = trueProx
+
+    recolored_testing_img.save("image_process/TRUE_COLOR.jpg")
+    '''
+                
     
 
 
