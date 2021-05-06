@@ -98,7 +98,7 @@ def k_means(pxLoad, width, height, k) :
 
         #print("Clusters Stabilized: " , sameAvgCounter)
     
-    print(averages)
+    print("Colors averaged by K-means:\n",  averages, end='\n\n')
     return averages
 
 #helper function for k_means.
@@ -164,24 +164,37 @@ if __name__ == '__main__' :
                     px_recolored_training[i,j] = colors[k]
                     lowestProx = trueProx
                 
+    do_basic_agent = input("Would you like to run the basic agent algorithm? (type in 'yes' for yes, or anything else for no!) ")
+    do_advanced_agent = input("\nWould you like to run the advanced agent algorithm? (type in 'yes' for yes, or anything else for no!) ")
+    do_basic_agent.lower()
+    do_advanced_agent.lower()
 
-    #basicAgent.basicAgent(training_img, testing_img, recolored_training_img)
 
-    learningRate = float(input("what should the learning rate be?"))
-    aa.advancedAgent(training_img_C, testing_img, training_img)
+    if(do_basic_agent == 'y' or do_basic_agent == "yes"):
+        print("Running the Basic Agent. . .")
+        basicAgent.basicAgent(training_img, testing_img, recolored_training_img)
 
-    #restructuring the new final image
+    if(do_advanced_agent == 'y' or do_advanced_agent == "yes"):
+        print("Running the S.I.G.M.O.I.D Advanced Agent. . .\n")
+        aa.advancedAgent(training_img_C, testing_img, training_img)
 
-    colorized = Image.open("image_process/testing_img_COLORIZED.jpg")
+        #restructuring the new final image
 
-    left_size = training_img_C.size
-    right_size = colorized.size
+        colorized = Image.open("image_process/testing_img_COLORIZED.jpg")
 
-    new_image = Image.new('RGB' , (2*left_size[0], left_size[1]), (250,250,250) )
-    new_image.paste(training_img_C, (0,0))
-    new_image.paste(colorized, (left_size[0], 0))
-    new_image.save("image_process/FINAL_IMAGE.JPG")
-    new_image.show()
+        left_size = training_img_C.size
+        right_size = colorized.size
+
+        new_image = Image.new('RGB' , (2*left_size[0], left_size[1]), (250,250,250) )
+        new_image.paste(training_img_C, (0,0))
+        new_image.paste(colorized, (left_size[0], 0))
+        new_image.save("image_process/Final_Image_Advanced.JPG")
+        new_image.show()
+
+    
+
+
+
 
 
 

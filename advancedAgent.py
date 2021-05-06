@@ -35,6 +35,7 @@ def advancedAgent(training_img, testing_img, grayscale_training_img):
 
     #STEP 2: ADD FEATURES TO INPUT DATA (OPTIONAL DEPENDING ON MODEL!)
 
+
     #gray_input_data = addFeatures(gray_input_data, 0)
 
 
@@ -51,15 +52,17 @@ def advancedAgent(training_img, testing_img, grayscale_training_img):
 
     #STEP 4-6: REGRESSION???? (3 for each color value!)
 
+    learning_rate = float(input("what should the learning rate be? Please enter a value between 0 and 1 (using 1 works the best!) : "))
+
     print("Regression on red values. . .")
-    red_weights_FINAL = logisticRegression(gray_input_data, red_weights, red_output_data)
+    red_weights_FINAL = logisticRegression(gray_input_data, red_weights, red_output_data, learning_rate)
     
     
     print("Regression on green values. . .")
-    blue_weights_FINAL = logisticRegression(gray_input_data, green_weights, blue_output_data)
+    blue_weights_FINAL = logisticRegression(gray_input_data, green_weights, blue_output_data, learning_rate)
 
     print("Regression on blue values. . .")
-    green_weights_FINAL = logisticRegression(gray_input_data, blue_weights, green_output_data)
+    green_weights_FINAL = logisticRegression(gray_input_data, blue_weights, green_output_data, learning_rate)
     
 
 
@@ -91,23 +94,26 @@ def advancedAgent(training_img, testing_img, grayscale_training_img):
 
 #given the input data, the vector of weights, and the expected output data for training, applies regression on the weight vector.
 #stops when TODO: (when does it stop lmfao)
-def logisticRegression(input_data, weight_vector, expected_output_data):
+def logisticRegression(input_data, weight_vector, expected_output_data, learning_rate):
 
     #STEP 4: APPLY MODEL TO INPUT DATA (input_data[i] dot product weight_vector)
     #STEP 5: APPLY LOSS FUNCTION USING PREDICTED DATA AND TRAINING DATA
     #STEP 6: DERIVATIVE MAGIC AND STOCHASTIC GRADIENT DESCENT TO GET NEW WEIGHTS???
 
-    
+    hundred_counter = 0
 
-    for i in range(100): #WHEN DOES IT STOP
-        print("On iteration: ", i)
+    for i in range(3000): #WHEN DOES IT STOP
+        hundred_counter += 1
+        if(hundred_counter == 100):
+            print("On iteration: ", i+1)
+            hundred_counter = 0
         
         
         predicted_output_data = applySigmoidModel(input_data, weight_vector)
 
         derivatives = calculateDerivatives(predicted_output_data, expected_output_data, weight_vector, input_data)
 
-        weight_vector = updateWeights(weight_vector, derivatives)
+        weight_vector = updateWeights(weight_vector, derivatives, learning_rate)
 
         
 
@@ -116,18 +122,21 @@ def logisticRegression(input_data, weight_vector, expected_output_data):
 #DEPRECATED DO NOT USE#################
 #modifies an integer (preferably the color value lol) so that instead of having a domain/range of 0->255, they have a range of -1->1 . 
 #returns rescaled value
+'''
 def rescaleData(x):
     y = 1 - (x / 127.5)
     return y 
-
+'''
+#DEPRECATED DO NOT USE#################
 #function to scale data back to its original form.
 #returns scaled value
+'''
 def rescaleDataBack(x) :
     y = (1 - x) * 127.5
     return y
-#DEPRECATED DO NOT USE#################
+'''
 
-#alternate function to rescale data because the other one did not make sense
+#alternate function to rescale data because the other one did not make sense. Rescales data from 0->255 to 0->1 . 
 #returns rescaled value
 def rescaleData2(x):
     y = x / 255
@@ -208,25 +217,25 @@ def sigmoid(value):
     sig = 1. / (1 + x)
     return sig
 
-#takes in the predicted data, and the expected data, and calculates the derivative with respect to wj for each element w in the weight vector.  
+#takes in the predicted data, and the expected data, and calculates the derivative with respect to wj for each element w in the weight vector.  (STOCHASTIC GRADIENT DESCENT)
 #returns the vector of derivative values
 def calculateDerivatives(predicted, expected, weight_vector, input_data):
-    randomDataPoint = randint(0, len(input_data))
+    randomDataPoint = randint(0, len(input_data)-1)
     derivatives = []
     for i in range(len(weight_vector)):
 
         derivatives.append(predicted[randomDataPoint]) # sigmoid(w.x) of the random datapoint. 
         derivatives[i] = 2 * derivatives[i] # 2 * sigmoid(w.x)
         derivatives[i] = derivatives[i] - (2 * expected[randomDataPoint]) # (2 * sigmoid(w.x)) - 2y
-        derivatives[i] = derivatives[i] * predicted[randomDataPoint] * (1 - predicted[randomDataPoint]) * input_data[randomDataPoint][i]
+        derivatives[i] = derivatives[i] * predicted[randomDataPoint] * (1 - predicted[randomDataPoint]) * input_data[randomDataPoint][i] # ((2 * sigmoid(x.x)) - 2y) * sigmoid(w.x) * (1 - sigmoid(w.x)) * xj
     return derivatives
 
-#updates the weights after the derivates have been calculated and stored in a vector.
+#updates the weights after the derivates have been calculated and stored in a vector. (STOCHASTIC GRADIENT DESCENT)
 #returns updated weights.
-def updateWeights(weights, derivatives):
+def updateWeights(weights, derivatives, learning_rate):
     new_weights = [] 
     for i in range(len(weights)):
-        new_weight = weights[i] - derivatives[i]
+        new_weight = weights[i] - (learning_rate * derivatives[i])
         new_weights.append(new_weight)
     
     return new_weights
@@ -239,7 +248,8 @@ def dotProduct(v1, v2):
         x += (v1[i] * v2[i])
     return x
 
-
+#uses newly rosolved colors and applies them to the testing half of the image.
+#saves the image to a file called "testing_img_COLORIZED.jpg" and returns.
 def colorizeImage(reds, greens, blues, testing_img, width, height):
     
     tst_px = testing_img.load()

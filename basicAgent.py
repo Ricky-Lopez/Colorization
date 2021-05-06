@@ -103,7 +103,9 @@ def basicAgent(training_img, testing_img, recolored_training_img):
                 
     testing_img.save("image_process/reconstructed.jpg")
     
-    combine_image(recolored_training_img, testing_img).save("image_process/full_reconstructed.jpg")
+    combine_image(recolored_training_img, testing_img).save("image_process/Final_Image_Basic.jpg")
+    final_img = Image.open("image_process/Final_Image_Basic.jpg")
+    final_img.show()
     
 #Returns a majority representative color using the given six similar patches
 def getColorRepresent(sixSimilar, recolored_px):
